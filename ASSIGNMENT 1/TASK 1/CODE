@@ -1,0 +1,30 @@
+class Vehicle {
+    private final String registrationNumber;
+    private final String type;
+ 
+    Vehicle(String registrationNumber, String type) {
+        this.registrationNumber = registrationNumber;
+        this.type = type;
+    }
+ 
+    String getRegistrationNumber() {
+        return registrationNumber;
+    }
+ 
+    String getType() {
+        return type;
+    }
+ 
+    void display() {
+        System.out.println(registrationNumber + " - " + type);
+    }
+}
+ 
+public class Task01 {
+    public static void main(String[] args) {
+        Vehicle v1 = new Vehicle("TN01AB1234", "Car");
+        Vehicle v2 = new Vehicle("TN02CD5678", "TwoWheeler");
+        v1.display();
+        v2.display();
+    }
+}
