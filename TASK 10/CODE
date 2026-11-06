@@ -1,0 +1,45 @@
+public class Task10 {
+    static class ParkingRecord {
+        private String registrationNumber;
+        private Integer floorNumber;
+ 
+        ParkingRecord(String registrationNumber, Integer floorNumber) {
+            setRegistrationNumber(registrationNumber);
+            setFloorNumber(floorNumber);
+        }
+ 
+        public String getRegistrationNumber() {
+            return registrationNumber;
+        }
+ 
+        public void setRegistrationNumber(String registrationNumber) {
+            if (registrationNumber == null ||
+                    registrationNumber.trim().isEmpty()) {
+                throw new IllegalArgumentException(
+                        "Registration number cannot be empty");
+            }
+            this.registrationNumber = registrationNumber;
+        }
+ 
+        public Integer getFloorNumber() {
+            return floorNumber;
+        }
+ 
+        public void setFloorNumber(Integer floorNumber) {
+            if (floorNumber == null || floorNumber < 0) {
+                throw new IllegalArgumentException(
+                        "Floor number must be zero or greater");
+            }
+            this.floorNumber = floorNumber;
+        }
+    }
+ 
+    public static void main(String[] args) {
+        ParkingRecord record = new ParkingRecord("TN01AB1234", 2);
+        Integer floor = record.getFloorNumber();
+        int unboxedFloor = floor;
+ 
+        System.out.println(record.getRegistrationNumber());
+        System.out.println("Floor: " + unboxedFloor);
+    }
+}
