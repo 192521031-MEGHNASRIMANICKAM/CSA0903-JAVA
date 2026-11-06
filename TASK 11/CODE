@@ -1,0 +1,83 @@
+import java.util.*;
+ 
+public class Task11 {
+    static class ParkingTicket {
+        final String regNo;
+        final int floor;
+        final int slot;
+        final long entryTime;
+ 
+        ParkingTicket(String regNo, int floor, int slot) {
+            this.regNo = regNo;
+            this.floor = floor;
+            this.slot = slot;
+            this.entryTime = System.currentTimeMillis();
+        }
+    }
+ 
+    static class ParkingFacility {
+        private final String[][] slots;
+        private final Map<String, ParkingTicket> active = new HashMap<>();
+ 
+        ParkingFacility(int[] sizes) {
+            slots = new String[sizes.length][];
+            for (int i = 0; i < sizes.length; i++) {
+                slots[i] = new String[sizes[i]];
+            }
+        }
+ 
+        ParkingTicket park(String regNo) {
+            if (active.containsKey(regNo)) return null;
+ 
+            for (int f = 0; f < slots.length; f++) {
+                for (int s = 0; s < slots[f].length; s++) {
+                    if (slots[f][s] == null) {
+                        slots[f][s] = regNo;
+                        ParkingTicket ticket =
+                                new ParkingTicket(regNo, f, s);
+                        active.put(regNo, ticket);
+                        return ticket;
+                    }
+                }
+            }
+            return null;
+        }
+ 
+        boolean exit(String regNo) {
+            ParkingTicket ticket = active.remove(regNo);
+            if (ticket == null) return false;
+            slots[ticket.floor][ticket.slot] = null;
+            return true;
+        }
+ 
+        int availableSlots() {
+            int total = 0;
+            for (String[] floor : slots) total += floor.length;
+            return total - active.size();
+        }
+    }
+ 
+    public static void main(String[] args) {
+        ParkingFacility facility = new ParkingFacility(new int[]{1, 2});
+ 
+        ParkingTicket t1 = facility.park("TN01AA1111");
+        ParkingTicket t2 = facility.park("TN02BB2222");
+        ParkingTicket t3 = facility.park("TN03CC3333");
+        ParkingTicket t4 = facility.park("TN04DD4444");
+ 
+        System.out.println(t1 == null ? "No slot" :
+                "Ticket " + t1.regNo + " -> [" + t1.floor + "," + t1.slot + "]");
+        System.out.println(t2 == null ? "No slot" :
+                "Ticket " + t2.regNo + " -> [" + t2.floor + "," + t2.slot + "]");
+        System.out.println(t3 == null ? "No slot" :
+                "Ticket " + t3.regNo + " -> [" + t3.floor + "," + t3.slot + "]");
+        System.out.println(t4 == null ? "No slot" : "Unexpected allocation");
+ 
+        System.out.println("Available: " + facility.availableSlots());
+        System.out.println("Exit TN02BB2222: " +
+                facility.exit("TN02BB2222"));
+        System.out.println("Available: " + facility.availableSlots());
+        System.out.println("Duplicate exit: " +
+                facility.exit("TN02BB2222"));
+    }
+}
