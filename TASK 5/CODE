@@ -1,0 +1,24 @@
+class Ticket {
+    private static int nextNumber = 1001;
+    private final int ticketNumber;
+ 
+    Ticket() {
+        ticketNumber = nextNumber++;
+    }
+ 
+    int getTicketNumber() {
+        return ticketNumber;
+    }
+}
+ 
+public class Task05 {
+    public static void main(String[] args) {
+        Ticket t1 = new Ticket();
+        Ticket t2 = new Ticket();
+        Ticket t3 = new Ticket();
+ 
+        System.out.println(t1.getTicketNumber());
+        System.out.println(t2.getTicketNumber());
+        System.out.println(t3.getTicketNumber());
+    }
+}
