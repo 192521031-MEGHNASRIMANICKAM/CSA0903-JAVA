@@ -1,0 +1,103 @@
+
+        public boolean releaseSlot(int floor, int slot) {
+            if (floor < 0 || floor >= slots.length || slot < 0 || slot >= slots[floor].length || slots[floor][slot] == null)
+                return false;
+            Vehicle vehicle = slots[floor][slot];
+            ParkingTicket ticket = ticketIndex.remove(vehicle.getRegNo());
+            slots[floor][slot] = null;
+            if (ticket != null) {
+                for (int i = 0; i < activeTickets.length; i++)
+                    if (activeTickets[i] == ticket) { activeTickets[i] = null; break; }
+            }
+            occupied--;
+            return true;
+        }
+
+        public int getOccupied() { return occupied; }
+        public int getCapacity() { return activeTickets.length; }
+        public ParkingTicket findTicket(String regNo) { return ticketIndex.get(regNo.toUpperCase()); }
+    }
+
+    // TASK 8 - Complete the Code: expected FeeDemo output
+    static class FeeDemo {
+        static void run() {
+            Vehicle[] parked = {new TwoWheeler("TN01A1"), new Car("TN02B2"), new ElectricCar("TN03C3")};
+            for (Vehicle v : parked) {
+                double fee = v.calculateFee(130);
+                if (v instanceof Chargeable c) fee += c.chargingFee(10);
+                System.out.println(v.getClass().getSimpleName() + " " + v.getRegNo() + " -> Rs " + fee);
+            }
+            System.out.println(new Car("TN02B2").equals(new ElectricCar("TN02B2")));
+        }
+    }
+
+    // TASK 12 - New vehicle categories, pricing rule and visitor day pass are implemented above.
+    // TASK 11 - Validation and hand-checkable collection scenario
+    static void runSystemTests() {
+        SmartParkingLot lot = new SmartParkingLot(new int[]{2, 1, 2});
+        LocalDateTime start = LocalDateTime.of(2026, 11, 11, 10, 0);
+        ParkingTicket t1 = lot.vehicleEntry(new TwoWheeler("TN10AA1000"), start, null);
+        ParkingTicket t2 = lot.vehicleEntry(new Car("TN20BB2000"), start, null);
+        ParkingTicket t3 = lot.vehicleEntry(new ElectricCar("TN30CC3000"), start, null);
+        ParkingTicket t4 = lot.vehicleEntry(new EBike("TN40DD4000"), start, null);
+        ParkingTicket t5 = lot.vehicleEntry(new DeliveryVan("TN50EE5000"), start, null);
+
+        System.out.println("Allocated tickets: " + (t1 != null) + ", " + (t2 != null) + ", " + (t3 != null) + ", " + (t4 != null) + ", " + (t5 != null));
+        System.out.println("Capacity full: " + (lot.vehicleEntry(new Car("TN60FF6000"), start, null) == null));
+        System.out.println("Duplicate rejected: " + rejects(() -> lot.vehicleEntry(new Car("TN10AA1000"), start, null)));
+        System.out.println("Unknown type rejected: " + rejects(() -> createVehicle("bus", "TN99ZZ9999")));
+        System.out.println("Invalid slot rejected: " + !lot.releaseSlot(9, 0));
+
+        double twoWheelerFee = lot.vehicleExit("TN10AA1000", start.plusMinutes(60), 0);
+        double carFee = lot.vehicleExit("TN20BB2000", start.plusMinutes(60), 0);
+        double evFee = lot.vehicleExit("TN30CC3000", start.plusMinutes(60), 10);
+        double ebikeFee = lot.vehicleExit("TN40DD4000", start.plusMinutes(60), 0);
+        double vanFee = lot.vehicleExit("TN50EE5000", start.plusMinutes(60), 0);
+        double total = twoWheelerFee + carFee + evFee + ebikeFee + vanFee;
+        System.out.println("Fees: " + twoWheelerFee + ", " + carFee + ", " + evFee + ", " + ebikeFee + ", " + vanFee);
+        System.out.println("Total collection: Rs " + total);
+        System.out.println("Expected total: Rs 270.0");
+        System.out.println("Zero-minute car fee: " + new Car("TN70GG7000").calculateFee(0));
+        System.out.println("Exact 60-minute car fee: " + new Car("TN80HH8000").calculateFee(60));
+
+        SmartParkingLot passLot = new SmartParkingLot(new int[]{1});
+        ParkingPass monthly = new MonthlyPass("Staff Member");
+        passLot.vehicleEntry(new Car("TN90II9000"), start, monthly);
+        System.out.println("Monthly pass fee: " + passLot.vehicleExit("TN90II9000", start.plusHours(3), 0));
+        passLot.vehicleEntry(new Car("TN91JJ9100"), start, new DayPass(start.toLocalDate()));
+        System.out.println("One-day pass fee: " + passLot.vehicleExit("TN91JJ9100", start.plusHours(5), 0));
+    }
+
+    interface TestAction { void run(); }
+    static boolean rejects(TestAction action) {
+        try { action.run(); return false; }
+        catch (IllegalArgumentException ex) { return true; }
+    }
+
+    // TASK 2 - Scanner input example for console-based registration input.
+    static String readRegistration(Scanner scanner) {
+        System.out.print("Enter vehicle registration number: ");
+        return scanner.nextLine().trim();
+    }
+
+    // TASK 12 - New vehicle factory; unknown categories are rejected.
+    static Vehicle createVehicle(String type, String regNo) {
+        return switch (type.toLowerCase()) {
+            case "two-wheeler" -> new TwoWheeler(regNo);
+            case "car" -> new Car(regNo);
+            case "electric-car" -> new ElectricCar(regNo);
+            case "e-bike" -> new EBike(regNo);
+            case "delivery-van" -> new DeliveryVan(regNo);
+            default -> throw new IllegalArgumentException("Unknown vehicle type: " + type);
+        };
+    }
+
+    public static void main(String[] args) {
+        System.out.println("TASK 3 - ParkingFacility output");
+        ParkingFacilityDemo.run();
+        System.out.println("\nTASK 8 - FeeDemo output");
+        FeeDemo.run();
+        System.out.println("\nTASK 11 - Smart Parking System tests");
+        runSystemTests();
+    }
+}
